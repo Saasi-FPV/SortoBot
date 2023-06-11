@@ -1,6 +1,5 @@
-#include <Arduino.h>
-
 //Librarys
+#include <Arduino.h>
 #include <AccelStepper.h>
 #include "RotaryEncoder.h"
 #include "CoordinateSys.h"
@@ -32,7 +31,7 @@
 //Velocety
 #define cmaxSpeed 50     // mm/s
 #define cmaxAccel 1000   // mm/s^2
-#define xmaxSpeed 50     // mm/s
+#define xmaxSpeed 25     // mm/s
 #define xmaxAccel 100   // mm/s^2
 #define zmaxSpeed 50     // mm/s
 #define zmaxAccel 1000   // mm/s^2
@@ -44,6 +43,8 @@ AccelStepper xMot(1, xAxStep, xAxDir);
 AccelStepper zMot(1, zAxStep, zAxDir);
 //ControllDeff
 RotaryEncoder rot1(ra1, rb1, rs1);
+//CoordinatDeff
+CoordinateSys coord;
 
 
 //FuncDeff
@@ -87,16 +88,26 @@ void loop() {
 
 
   switch(axSelect){
+    case 0:
+      coord.selectAx('n');
+    break;
+    
     case 1:
-      xMot.moveTo(rot1.getPos()*stpsPerMMX);
+      coord.selectAx('x');
+      coord.addAxAbs(rot1.getPos());
+      xMot.moveTo(coord.getAxAbs('x')*stpsPerMMX);
     break;
 
     case 2:
-      cMot.moveTo(rot1.getPos()*stpsPerDeg);
+      coord.selectAx('c');
+      coord.addAxAbs(rot1.getPos());
+      cMot.moveTo(coord.getAxAbs('c')*stpsPerDeg);
     break;
 
     case 3:
-      zMot.moveTo(rot1.getPos()*stpsPerMMZ);
+      coord.selectAx('z');
+      coord.addAxAbs(rot1.getPos());
+      zMot.moveTo(coord.getAxAbs('z')*stpsPerMMZ);
     break;
   }  
 
@@ -104,9 +115,10 @@ void loop() {
   
   
   
-  debug();
+  coord.update(rot1.getPos());
   rot1.run();
   runMot();
+  debug();
 }
 
 void runMot(){
@@ -142,5 +154,18 @@ void debug(){
     Serial.println(rot1.getPos());
     Serial.print("SW state: ");
     Serial.println(rot1.getButton());
+
+    Serial.print("XSoll: ");
+    Serial.println(coord.getAxAbs('x'));
+    Serial.print("CSoll: ");
+    Serial.println(coord.getAxAbs('c'));
+    Serial.print("ZSoll: ");
+    Serial.println(coord.getAxAbs('z'));
+
+
+
+
+
+
   }
 }
