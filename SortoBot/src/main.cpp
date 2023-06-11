@@ -29,9 +29,9 @@
 #define stpsPerMMX 133//4267
 #define stpsPerMMZ 160
 //Velocety
-#define cmaxSpeed 50     // mm/s
-#define cmaxAccel 1000   // mm/s^2
-#define xmaxSpeed 25     // mm/s
+#define cmaxSpeed 60     // mm/s
+#define cmaxAccel 100   // mm/s^2
+#define xmaxSpeed 17     // mm/s
 #define xmaxAccel 100   // mm/s^2
 #define zmaxSpeed 50     // mm/s
 #define zmaxAccel 1000   // mm/s^2
@@ -95,19 +95,19 @@ void loop() {
     case 1:
       coord.selectAx('x');
       coord.addAxAbs(rot1.getPos());
-      xMot.moveTo(coord.getAxAbs('x')*stpsPerMMX);
+      xMot.moveTo(coord.getAxAbs('x')*-stpsPerMMX);
     break;
 
     case 2:
       coord.selectAx('c');
       coord.addAxAbs(rot1.getPos());
-      cMot.moveTo(coord.getAxAbs('c')*stpsPerDeg);
+      cMot.moveTo(coord.getAxAbs('c')*-stpsPerDeg);
     break;
 
     case 3:
       coord.selectAx('z');
       coord.addAxAbs(rot1.getPos());
-      zMot.moveTo(coord.getAxAbs('z')*stpsPerMMZ);
+      zMot.moveTo(coord.getAxAbs('z')*-stpsPerMMZ);
     break;
   }  
 
@@ -155,15 +155,12 @@ void debug(){
     Serial.print("SW state: ");
     Serial.println(rot1.getButton());
 
-    Serial.print("XSoll: ");
+    Serial.print("XAxSoll: ");
     Serial.println(coord.getAxAbs('x'));
-    Serial.print("CSoll: ");
+    Serial.print("CAxSoll: ");
     Serial.println(coord.getAxAbs('c'));
-    Serial.print("ZSoll: ");
+    Serial.print("ZAxSoll: ");
     Serial.println(coord.getAxAbs('z'));
-
-
-
 
 
 

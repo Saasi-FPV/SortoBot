@@ -44,15 +44,15 @@
   void CoordinateSys::addAxAbs(int in){
     switch(selectedAx){
       case 'x':
-        xAxAbs = prevEncoderPos - in;
+        xAxAbs = xAxAbs + (in - prevEncoderPos);
       break;
 
       case 'c':
-        cAxAbs = prevEncoderPos - in;
+        cAxAbs = cAxAbs + (in - prevEncoderPos);
       break;
 
       case 'z':
-        zAxAbs = prevEncoderPos - in;
+        zAxAbs = zAxAbs + (in - prevEncoderPos);
       break;
     }
   }
