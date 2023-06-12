@@ -11,9 +11,11 @@ class CoordinateSys{
 
     int prevEncoderPos;
 
-    float xAxAbs;
-    float cAxAbs;
-    float zAxAbs;
+    int xAxAbs;
+    int cAxAbs;
+    int zAxAbs;
+
+
 
 
   public:
@@ -30,11 +32,10 @@ class CoordinateSys{
 
     void selectAx(char in);
     void update(int in);
-    float getAxAbs(char in);
-    float getOrigAbs (char in);
+    int getAxAbs(char in);
+    int getOrigAbs (char in);
     void addAxAbs(int in);
-
-
+    void setAxAbs(int in);
 
 };
 
