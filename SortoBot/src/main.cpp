@@ -3,6 +3,7 @@
 #include <AccelStepper.h>
 #include "RotaryEncoder.h"
 #include "CoordinateSys.h"
+#include "Coordinates.h"
 
 
 //MotPins
@@ -22,6 +23,10 @@
 #define ra1 5
 #define rb1 18
 #define rs1 19
+
+//MagnetPin
+#define magnet 32
+
 
 
 //StepperCalc
@@ -50,6 +55,8 @@ CoordinateSys coord;
 //FuncDeff
 void runMot();
 void reverenz();
+void autorun();
+void manuelControll();
 void debug();
 
 
@@ -64,16 +71,60 @@ void setup() {
   zMot.setMaxSpeed(zmaxSpeed * stpsPerMMZ);
   zMot.setAcceleration(zmaxAccel * stpsPerMMZ);
 
+  pinMode(magnet, OUTPUT);
+  digitalWrite(magnet, 1);
+
   rot1.begin();
 
   Serial.begin(115200);
 
 }
 
+void loop() {
+
+  
+  manuelControll();
+
+
+  coord.update(rot1.getPos());
+  rot1.run();
+  runMot();
+  debug();
+}
+
+
+
+void runMot(){
+  cMot.run();
+  xMot.run();
+  zMot.run();
+}
+
+void reverenz(){
+  
+}
+
+void autorun(){
+  
+
+  coord.addAxAbs(points[0][0]);
+  xMot.moveTo(coord.getAxAbs('x')*-stpsPerMMX);
+  coord.addAxAbs(points[0][1]);
+  cMot.moveTo(coord.getAxAbs('c')*-stpsPerDeg);
+  coord.addAxAbs(points[0][2]);
+  zMot.moveTo(coord.getAxAbs('z')*-stpsPerMMZ);
+  while(xMot.currentPosition() != (points[0][0]*-stpsPerMMX) && cMot.currentPosition() != (points[0][1]*-stpsPerDeg) && zMot.currentPosition() != (points[0][3]*-stpsPerMMZ))
+  {
+    runMot();
+  }
+
+}
+
+
 unsigned long previousMillisSW = 0; 
 const long intervalSW = 1000;
-void loop() {
-  
+void manuelControll(){
+
   unsigned long currentMillisSW = millis();
   if(rot1.getButton() == 1 && (currentMillisSW - previousMillisSW >= intervalSW)){
     previousMillisSW = currentMillisSW;
@@ -110,31 +161,7 @@ void loop() {
       zMot.moveTo(coord.getAxAbs('z')*-stpsPerMMZ);
     break;
   }  
-
-  
-  
-  
-  
-  coord.update(rot1.getPos());
-  rot1.run();
-  runMot();
-  debug();
 }
-
-void runMot(){
-  cMot.run();
-  xMot.run();
-  zMot.run();
-}
-
-void reverenz(){
-  
-}
-
-
-
-
-
 
 
 
@@ -145,6 +172,7 @@ void reverenz(){
 
 unsigned long previousMillisdebug = 0; 
 const long intervaldebug = 1000;
+
 void debug(){
 
   unsigned long currentMillis = millis(); 
