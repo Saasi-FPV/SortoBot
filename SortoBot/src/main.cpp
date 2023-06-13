@@ -30,7 +30,7 @@
 
 
 //StepperCalc
-#define stpsPerDeg 133.333333
+#define stpsPerDeg 134
 #define stpsPerMMX 133//4267
 #define stpsPerMMZ 160
 //Velocety
@@ -81,12 +81,13 @@ void setup() {
 }
 
 void loop() {
-
   
   manuelControll();
+  //autorun();
 
 
-  coord.update(rot1.getPos());
+
+  
   rot1.run();
   runMot();
   debug();
@@ -106,18 +107,17 @@ void reverenz(){
 
 void autorun(){
   
-
-  coord.addAxAbs(points[0][0]);
+  coord.selectAx('x');
+  coord.setAxAbs(points[1][0]);
   xMot.moveTo(coord.getAxAbs('x')*-stpsPerMMX);
-  coord.addAxAbs(points[0][1]);
+  coord.selectAx('c');
+  coord.setAxAbs(points[1][1]);
   cMot.moveTo(coord.getAxAbs('c')*-stpsPerDeg);
-  coord.addAxAbs(points[0][2]);
+  coord.selectAx('z');
+  coord.setAxAbs(points[1][2]);
   zMot.moveTo(coord.getAxAbs('z')*-stpsPerMMZ);
-  while(xMot.currentPosition() != (points[0][0]*-stpsPerMMX) && cMot.currentPosition() != (points[0][1]*-stpsPerDeg) && zMot.currentPosition() != (points[0][3]*-stpsPerMMZ))
-  {
-    runMot();
-  }
-
+  
+  coord.selectAx('n');
 }
 
 
@@ -161,6 +161,7 @@ void manuelControll(){
       zMot.moveTo(coord.getAxAbs('z')*-stpsPerMMZ);
     break;
   }  
+  coord.update(rot1.getPos());
 }
 
 
@@ -190,6 +191,9 @@ void debug(){
     Serial.print("ZAxSoll: ");
     Serial.println(coord.getAxAbs('z'));
 
+    Serial.print(points[0][0]*-stpsPerMMX); Serial.print("   "); Serial.println(xMot.currentPosition());
+    Serial.print(points[0][1]*-stpsPerDeg); Serial.print("   "); Serial.println(cMot.currentPosition());
+    Serial.print(points[0][2]*-stpsPerMMZ); Serial.print("   "); Serial.println(zMot.currentPosition());
 
 
   }
