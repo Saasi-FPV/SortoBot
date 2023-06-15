@@ -3,7 +3,6 @@
 #include <AccelStepper.h>
 #include "RotaryEncoder.h"
 #include "CoordinateSys.h"
-#include "Coordinates.h"
 
 
 //MotPins
@@ -55,13 +54,20 @@ CoordinateSys coord;
 //FuncDeff
 void runMot();
 void reverenz();
-void autorun();
+void serialCordIn();
+void runOnPos();
+void onPos();
 void manuelControll();
 void debug();
 
 
+
 //Global Variables
 int axSelect = 0;
+int inX = 0;
+int inC = 0;
+int inZ = 0;
+int inM = 0;
 
 void setup() {
   cMot.setMaxSpeed(cmaxSpeed * stpsPerDeg);
@@ -72,7 +78,6 @@ void setup() {
   zMot.setAcceleration(zmaxAccel * stpsPerMMZ);
 
   pinMode(magnet, OUTPUT);
-  digitalWrite(magnet, 1);
 
   rot1.begin();
 
@@ -82,8 +87,21 @@ void setup() {
 
 void loop() {
   
-  manuelControll();
-  //autorun();
+  serialCordIn();
+
+  if(inM == 1){
+    digitalWrite(magnet, 1);
+    runOnPos();
+  }
+  if(inM == 0){
+    digitalWrite(magnet, 0);
+    runOnPos();
+  }
+  if(inM >= 2){
+    manuelControll();
+  }
+
+
 
 
 
@@ -105,20 +123,91 @@ void reverenz(){
   
 }
 
-void autorun(){
+void serialCordIn(){
   
+  if (Serial.available()) {
+    String input = Serial.readStringUntil('\n');  // Eingabe bis zur Zeilenumbruch-Zeichen ('\n') lesen
+    input.trim();  // Führende und nachfolgende Leerzeichen entfernen
+
+    // Variablen für die Werte initialisieren
+    int x = 0;
+    int c = 0;
+    int z = 0;
+    int m = 0;
+
+    // Eingabe aufteilen und Werte extrahieren
+    int xPos = input.indexOf('x');
+    int cPos = input.indexOf('c');
+    int zPos = input.indexOf('z');
+    int mPos = input.indexOf('m');
+
+    if (xPos != -1 && cPos != -1 && zPos != -1 && mPos != -1) {
+      // Extrahieren der Werte als Teilstrings
+      String xValue = input.substring(xPos + 1, cPos);
+      String cValue = input.substring(cPos + 1, zPos);
+      String zValue = input.substring(zPos + 1, mPos);
+      String mValue = input.substring(mPos + 1);
+
+      // Konvertieren der Teilstrings in Ganzzahlen
+      x = xValue.toInt();
+      c = cValue.toInt();
+      z = zValue.toInt();
+      m = mValue.toInt();
+    }
+
+    // Überprüfen, ob die Werte erfolgreich extrahiert wurden
+    if (x != 0 && c != 0 && z != 0 && m != 0) {
+      // Hier kannst du den Code ausführen, der die Werte verwendet
+      // Zum Beispiel: Serial.print(x);, Serial.print(y); usw.
+      inX = x;
+      inC = c;
+      inZ = z;
+      inM = m;
+
+      Serial.print("inX "); Serial.println(inX);
+      Serial.print("inC "); Serial.println(inC);
+      Serial.print("inZ "); Serial.println(inZ);
+      Serial.print("inM "); Serial.println(inM);
+    }
+  }
+}
+
+void runOnPos(){
+
   coord.selectAx('x');
-  coord.setAxAbs(points[1][0]);
+  coord.setAxAbs(inX);
   xMot.moveTo(coord.getAxAbs('x')*-stpsPerMMX);
   coord.selectAx('c');
-  coord.setAxAbs(points[1][1]);
-  cMot.moveTo(coord.getAxAbs('c')*-stpsPerDeg);
+  coord.setAxAbs(inC);
+  xMot.moveTo(coord.getAxAbs('c')*-stpsPerDeg);
   coord.selectAx('z');
-  coord.setAxAbs(points[1][2]);
-  zMot.moveTo(coord.getAxAbs('z')*-stpsPerMMZ);
-  
-  coord.selectAx('n');
+  coord.setAxAbs(inZ);
+  xMot.moveTo(coord.getAxAbs('z')*-stpsPerMMZ);
+
 }
+
+void onPos(){
+  int flagcounteronPos = 0;
+
+  if(coord.getAxAbs('x')*-stpsPerMMX == xMot.currentPosition()){
+    flagcounteronPos++;
+  }
+
+  if(coord.getAxAbs('c')*-stpsPerDeg == cMot.currentPosition()){
+    flagcounteronPos++;
+  }
+
+  if(coord.getAxAbs('z')*-stpsPerMMZ == zMot.currentPosition()){
+    flagcounteronPos++;
+  }
+
+  if(flagcounteronPos == 3){
+    Serial.println("onPosition");
+  }
+
+
+}
+
 
 
 unsigned long previousMillisSW = 0; 
@@ -166,11 +255,6 @@ void manuelControll(){
 
 
 
-
-
-
-
-
 unsigned long previousMillisdebug = 0; 
 const long intervaldebug = 1000;
 
@@ -190,10 +274,6 @@ void debug(){
     Serial.println(coord.getAxAbs('c'));
     Serial.print("ZAxSoll: ");
     Serial.println(coord.getAxAbs('z'));
-
-    Serial.print(points[0][0]*-stpsPerMMX); Serial.print("   "); Serial.println(xMot.currentPosition());
-    Serial.print(points[0][1]*-stpsPerDeg); Serial.print("   "); Serial.println(cMot.currentPosition());
-    Serial.print(points[0][2]*-stpsPerMMZ); Serial.print("   "); Serial.println(zMot.currentPosition());
 
 
   }
