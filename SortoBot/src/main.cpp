@@ -89,15 +89,15 @@ void loop() {
   
   serialCordIn();
 
-  if(inM == 1){
+  if(inM == 2){
     digitalWrite(magnet, 1);
     runOnPos();
   }
-  if(inM == 0){
+  if(inM == 1){
     digitalWrite(magnet, 0);
     runOnPos();
   }
-  if(inM >= 2){
+  if(inM >= 3){
     manuelControll();
   }
 
@@ -179,10 +179,10 @@ void runOnPos(){
   xMot.moveTo(coord.getAxAbs('x')*-stpsPerMMX);
   coord.selectAx('c');
   coord.setAxAbs(inC);
-  xMot.moveTo(coord.getAxAbs('c')*-stpsPerDeg);
+  cMot.moveTo(coord.getAxAbs('c')*-stpsPerDeg);
   coord.selectAx('z');
   coord.setAxAbs(inZ);
-  xMot.moveTo(coord.getAxAbs('z')*-stpsPerMMZ);
+  zMot.moveTo(coord.getAxAbs('z')*-stpsPerMMZ);
 
 }
 
@@ -274,6 +274,8 @@ void debug(){
     Serial.println(coord.getAxAbs('c'));
     Serial.print("ZAxSoll: ");
     Serial.println(coord.getAxAbs('z'));
+    Serial.print("M: ");
+    Serial.println(inM);
 
 
   }
