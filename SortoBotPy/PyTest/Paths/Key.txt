@@ -1,0 +1,37 @@
+PickUpWait  = Path0.csv
+PickUp      = Path1.csv
+Scan        = Path2.csv
+Drop1       = Path3.csv
+Drop2       = Path4.csv
+Drop3       = Path5.csv
+GoToRev     = Path6.csv
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Drive no Grip   = m1
+Drive Grip      = m2
+Manual          = m3
