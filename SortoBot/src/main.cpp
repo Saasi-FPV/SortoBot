@@ -33,11 +33,11 @@
 #define stpsPerMMX 133//4267
 #define stpsPerMMZ 160
 //Velocety
-#define cmaxSpeed 60     // mm/s
+#define cmaxSpeed 20     // mm/s
 #define cmaxAccel 100   // mm/s^2
-#define xmaxSpeed 17     // mm/s
-#define xmaxAccel 100   // mm/s^2
-#define zmaxSpeed 50     // mm/s
+#define xmaxSpeed 15     // mm/s
+#define xmaxAccel 50   // mm/s^2
+#define zmaxSpeed 20     // mm/s
 #define zmaxAccel 1000   // mm/s^2
 
 
@@ -68,6 +68,7 @@ int inX = 0;
 int inC = 0;
 int inZ = 0;
 int inM = 0;
+bool flagOnPos = 0;
 
 void setup() {
   cMot.setMaxSpeed(cmaxSpeed * stpsPerDeg);
@@ -92,10 +93,12 @@ void loop() {
   if(inM == 2){
     digitalWrite(magnet, 1);
     runOnPos();
+    onPos();
   }
   if(inM == 1){
     digitalWrite(magnet, 0);
     runOnPos();
+    onPos();
   }
   if(inM >= 3){
     manuelControll();
@@ -126,6 +129,10 @@ void reverenz(){
 void serialCordIn(){
   
   if (Serial.available()) {
+
+    flagOnPos = 0;
+
+
     String input = Serial.readStringUntil('\n');  // Eingabe bis zur Zeilenumbruch-Zeichen ('\n') lesen
     input.trim();  // Führende und nachfolgende Leerzeichen entfernen
 
@@ -163,11 +170,12 @@ void serialCordIn(){
       inC = c;
       inZ = z;
       inM = m;
-
+      /*
       Serial.print("inX "); Serial.println(inX);
       Serial.print("inC "); Serial.println(inC);
       Serial.print("inZ "); Serial.println(inZ);
       Serial.print("inM "); Serial.println(inM);
+      */
     }
   }
 }
@@ -186,7 +194,9 @@ void runOnPos(){
 
 }
 
+
 void onPos(){
+
   int flagcounteronPos = 0;
 
   if(coord.getAxAbs('x')*-stpsPerMMX == xMot.currentPosition()){
@@ -201,8 +211,9 @@ void onPos(){
     flagcounteronPos++;
   }
 
-  if(flagcounteronPos == 3){
+  if(flagcounteronPos == 3 && flagOnPos == 0){
     Serial.println("onPosition");
+    flagOnPos = 1;
   }
 
 
